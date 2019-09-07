@@ -13,7 +13,7 @@ import java.io.IOException;
  * @date: 2019-09-07 22:51
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("classpath:spring/applicationContext-task.xml")
+@ContextConfiguration("classpath*:spring/applicationContext-*.xml")
 public class TestMyTask {
 
     @Test
