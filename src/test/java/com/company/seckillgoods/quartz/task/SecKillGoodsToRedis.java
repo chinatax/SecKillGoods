@@ -43,9 +43,8 @@ public class SecKillGoodsToRedis {
         List<TbSeckillGoods> seckillGoodsList = seckillGoodsMapper.selectByExample(example);
         // 将查询出来的秒杀商品导入到redis
         for (TbSeckillGoods goods : seckillGoodsList) {
-            System.out.println(TbSeckillGoods.class.getSimpleName());
             // 将数据存入到redis的hash数据结构中(类似于map)
-            redisTemplate.boundHashOps("TbSeckillGoods").put(goods.getId(), goods);
+            redisTemplate.boundHashOps(TbSeckillGoods.class.getSimpleName()).put(goods.getId(), goods);
         }
     }
 }
