@@ -24,4 +24,9 @@ public class SecKillGoodsServiceImpl implements SecKillGoodsService {
     public List<TbSeckillGoods> findAll() {
         return seckillGoodsMapper.selectByExample(null);
     }
+
+    @Override
+    public TbSeckillGoods findOne(Long id) {
+        return seckillGoodsMapper.selectByPrimaryKey(id);
+    }
 }

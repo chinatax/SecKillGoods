@@ -16,4 +16,11 @@ public interface SecKillGoodsService {
      * @return
      */
     List<TbSeckillGoods> findAll();
+
+    /**
+     * 根据主键查询商品信息
+     * @param id
+     * @return
+     */
+    TbSeckillGoods findOne(Long id);
 }

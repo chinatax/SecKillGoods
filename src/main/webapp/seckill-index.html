@@ -13,7 +13,7 @@
     <script src="plugins/angularjs/angular.min.js"></script>
     <script type="text/javascript">
         var app = angular.module('mall', []);
-        app.controller('secKillGoodsController', function ($scope, $http) {
+        app.controller('secKillGoodsController', function ($scope, $http, $location) {
             // 查询所有秒杀商品
             $scope.findAll = function() {
                 $http.get('secKillGoodsController/findAll').success(
@@ -22,8 +22,12 @@
                     }
                 );
             }
-        });
 
+            // 跳转到商品详情页
+            $scope.jumpToDetail = function(id) {
+                location.href = 'seckill-item.html#?id=' + id;
+            }
+        });
     </script>
     <!-- modify by chunguang.yao on 2019-09-08 for 秒杀商品列表 end -->
 </head>
@@ -181,7 +185,7 @@
     <div class="goods-list">
         <ul class="seckill" id="seckill">
             <li class="seckill-item" ng-repeat="entity in list">
-                <div class="pic" onclick="location.href='seckill-item.html'">
+                <div class="pic" ng-click="jumpToDetail(entity.id);">
                     <img style="width:283px;height:290px" src="img/_/list.jpg" alt=''>
                 </div>
                 <div class="intro"><span>{{entity.title}}</span></div>
@@ -193,7 +197,7 @@
                     </div>
                     <div>剩余<b class='owned'>{{entity.stockCount}}</b>件</div>
                 </div>
-                <a class='sui-btn btn-block btn-buy' href='seckill-item.html' target='_blank'>立即抢购</a>
+                <span class='sui-btn btn-block btn-buy' ng-click="jumpToDetail(entity.id);" >立即抢购</span>
             </li>
         </ul>
     </div>
