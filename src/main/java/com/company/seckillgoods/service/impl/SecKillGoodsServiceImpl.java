@@ -2,11 +2,16 @@ package com.company.seckillgoods.service.impl;
 
 import com.company.seckillgoods.mapper.TbSeckillGoodsMapper;
 import com.company.seckillgoods.pojo.TbSeckillGoods;
+import com.company.seckillgoods.pojo.TbSeckillOrder;
+import com.company.seckillgoods.pojo.common.Result;
 import com.company.seckillgoods.service.SecKillGoodsService;
+import com.company.seckillgoods.util.IdWorker;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -21,6 +26,13 @@ public class SecKillGoodsServiceImpl implements SecKillGoodsService {
     @Autowired
     private TbSeckillGoodsMapper seckillGoodsMapper;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
+
+    // 注入id生成工具
+    @Autowired
+    private IdWorker idWorker;
+
     public List<TbSeckillGoods> findAll() {
         return seckillGoodsMapper.selectByExample(null);
     }
@@ -28,5 +40,39 @@ public class SecKillGoodsServiceImpl implements SecKillGoodsService {
     @Override
     public TbSeckillGoods findOne(Long id) {
         return seckillGoodsMapper.selectByPrimaryKey(id);
+    }
+
+    @Override
+    public Result saveOrder(Long id, String userId) {
+        // 1、从redis获取秒杀商品
+        TbSeckillGoods tbSeckillGoods  = (TbSeckillGoods) redisTemplate.boundHashOps(TbSeckillGoods.class.getSimpleName()).get(id);
+        // 2、判断商品是否存在或者库存<=0
+        if(null == tbSeckillGoods || tbSeckillGoods.getStockCount() <= 0) {
+            // 3、商品不存在，或者库存 <= 0 ，返回失败，提示已售罄
+            return  new Result(false, "该商品已售罄，请您查看其他商品!");
+        }
+        // 4、生成秒杀订单，将订单保存到redis
+        TbSeckillOrder seckillOrder = new TbSeckillOrder();
+        seckillOrder.setUserId(userId);
+        seckillOrder.setSellerId(tbSeckillGoods.getSellerId());
+        // 设置一个全局唯一的秒杀id
+        seckillOrder.setSeckillId(idWorker.nextId());
+        seckillOrder.setMoney(tbSeckillGoods.getCostPrice());
+        seckillOrder.setCreateTime(new Date());
+        // 未支付
+        seckillOrder.setStatus("0");
+        redisTemplate.boundHashOps(TbSeckillOrder.class.getSimpleName()).put(userId, seckillOrder);
+        // 5、秒杀商品库存量-1
+        tbSeckillGoods.setStockCount(tbSeckillGoods.getStockCount() - 1);;
+        // 6、判断库存量是否 <= 0
+        if(tbSeckillGoods.getStockCount() <= 0) {
+            // 7、是，将秒杀商品更新到数据库，删除redis对应的秒杀商品
+            seckillGoodsMapper.updateByPrimaryKey(tbSeckillGoods);
+            redisTemplate.boundHashOps(TbSeckillGoods.class.getSimpleName()).delete(id);
+        } else {
+            // 8、否，将秒杀商品更新到缓存，返回成功
+            redisTemplate.boundHashOps(TbSeckillGoods.class.getSimpleName()).put(id, tbSeckillGoods);
+        }
+        return new Result(true, "秒杀成功，请您尽快支付!");
     }
 }

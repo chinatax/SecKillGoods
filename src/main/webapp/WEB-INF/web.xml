@@ -8,7 +8,7 @@
     <!-- 4.配置spring容器位置：applicationContext.xml的位置（一般配置在filter上边） -->
     <context-param>
         <param-name>contextConfigLocation</param-name>
-        <param-value>classpath:spring/applicationContext-service.xml</param-value>
+        <param-value>classpath:spring/applicationContext-*.xml</param-value>
     </context-param>
 
     <!-- 2.配置编码过滤器（一般配置在servlet上边） -->

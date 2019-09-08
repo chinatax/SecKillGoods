@@ -42,6 +42,18 @@
                 );
             }
 
+            // 保存订单
+            $scope.saveOrder = function(){
+                $http.get('secKillGoodsController/saveOrder/' + $scope.item.id).success(
+                    function (response) {
+                        alert(response.message);
+                        if(response.success) {
+                            // 跳转到支付页面
+                            location.href = 'pay.html';
+                        }
+                })
+            }
+
             // 格式化时间
             $scope.convertTime2String = function (allseconds) {
                 //计算天数
@@ -299,7 +311,7 @@
                         <div class="fl">
                             <ul class="btn-choose unstyled">
                                 <li>
-                                    <a href="cart.html" target="_blank" class="sui-btn  btn-danger addshopcar">立即抢购</a>
+                                    <a href="javascript:void(0);" target="_self" ng-click="saveOrder();" class="sui-btn  btn-danger addshopcar">立即抢购</a>
                                 </li>
                             </ul>
                         </div>

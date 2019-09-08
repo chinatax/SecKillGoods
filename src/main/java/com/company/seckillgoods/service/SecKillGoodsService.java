@@ -1,6 +1,7 @@
 package com.company.seckillgoods.service;
 
 import com.company.seckillgoods.pojo.TbSeckillGoods;
+import com.company.seckillgoods.pojo.common.Result;
 
 import java.util.List;
 
@@ -23,4 +24,12 @@ public interface SecKillGoodsService {
      * @return
      */
     TbSeckillGoods findOne(Long id);
+
+    /**
+     * 保存订单
+     * @param id
+     * @param userId
+     * @return
+     */
+    Result saveOrder(Long id, String userId);
 }
