@@ -1,5 +1,6 @@
 package com.company.seckillgoods.service.impl;
 
+import com.company.seckillgoods.common.GlobalContant;
 import com.company.seckillgoods.mapper.TbSeckillGoodsMapper;
 import com.company.seckillgoods.pojo.TbSeckillGoods;
 import com.company.seckillgoods.pojo.TbSeckillOrder;
@@ -44,13 +45,15 @@ public class SecKillGoodsServiceImpl implements SecKillGoodsService {
 
     @Override
     public Result saveOrder(Long id, String userId) {
-        // 1、从redis获取秒杀商品
-        TbSeckillGoods tbSeckillGoods  = (TbSeckillGoods) redisTemplate.boundHashOps(TbSeckillGoods.class.getSimpleName()).get(id);
-        // 2、判断商品是否存在或者库存<=0
-        if(null == tbSeckillGoods || tbSeckillGoods.getStockCount() <= 0) {
+        // 1、从redis的队列中获取秒杀商品id
+        Long goodsId = (Long) redisTemplate.boundListOps(GlobalContant.SECKILLGOODS_ID_PREFIX + id).rightPop();
+        // 2、判断商品是否存在
+        if(null == goodsId) {
             // 3、商品不存在，或者库存 <= 0 ，返回失败，提示已售罄
             return  new Result(false, "该商品已售罄，请您查看其他商品!");
         }
+        // 能从队列中拿到id，说明用户秒杀成功，从redis缓存获取商品信息去创建订单。
+        TbSeckillGoods tbSeckillGoods  = (TbSeckillGoods) redisTemplate.boundHashOps(TbSeckillGoods.class.getSimpleName()).get(id);
         // 4、生成秒杀订单，将订单保存到redis
         TbSeckillOrder seckillOrder = new TbSeckillOrder();
         seckillOrder.setUserId(userId);

@@ -1,5 +1,6 @@
 package com.company.seckillgoods.quartz.task;
 
+import com.company.seckillgoods.common.GlobalContant;
 import com.company.seckillgoods.mapper.TbSeckillGoodsMapper;
 import com.company.seckillgoods.pojo.TbSeckillGoods;
 import com.company.seckillgoods.pojo.TbSeckillGoodsExample;
@@ -45,6 +46,24 @@ public class SecKillGoodsToRedis {
         for (TbSeckillGoods goods : seckillGoodsList) {
             // 将数据存入到redis的hash数据结构中(类似于map)
             redisTemplate.boundHashOps(TbSeckillGoods.class.getSimpleName()).put(goods.getId(), goods);
+            // 为每一个商品创建一个队列，队列中存放和库存数量相同的商品的id
+            createQueue(goods);
+        }
+    }
+
+    /**
+     * 为每一个商品创建一个队列，队列中存放和库存数量相同的商品的id
+     * @param goods
+     */
+    private void createQueue(TbSeckillGoods goods) {
+        // 库存大于0，我们才放入队列中
+        if(goods.getStockCount() > 0) {
+            // 在队列中放入和商品库存数量相同的id
+            for (Integer i = 0; i < goods.getStockCount(); i++) {
+                // redis对列是左进右出或者是左出右进的
+                // 我们选择左进右出
+                redisTemplate.boundListOps(GlobalContant.SECKILLGOODS_ID_PREFIX + goods.getId()).leftPush(goods.getId());
+            }
         }
     }
 }
