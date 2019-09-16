@@ -28,7 +28,7 @@ http://www.springframework.org/schema/context/spring-context.xsd">
     <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
         <property name="basePackage" value="com.company.seckillgoods.mapper"/>
     </bean>
-    <context:component-scan base-package="com.company.seckillgoods.service"/>
+    <context:component-scan base-package="com.company.seckillgoods.service, com.company.seckillgoods.thread"/>
     <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
         <property name="dataSource" ref="dataSource"/>
     </bean>
@@ -36,9 +36,28 @@ http://www.springframework.org/schema/context/spring-context.xsd">
     <!-- modify by chunguang.yao on 2019-09-09 for id生成工具类 -->
     <bean id="idWorker" class="com.company.seckillgoods.util.IdWorker">
         <!-- 机器ID初始值（可以不配置，有默认的） -->
-        <constructor-arg index="0" value="0" />
+        <constructor-arg index="0" value="0"/>
         <!-- 业务编码初始值（可以不配置，有默认的）-->
-        <constructor-arg index="1" value="0" />
+        <constructor-arg index="1" value="0"/>
     </bean>
+
+    <!-- modify by chunguang.yao on 2019-09-17 for 通过多线程创建订单 begin -->
+    <!-- 线程池配置 -->
+    <bean class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor" id="executor">
+        <!-- 核心线程数，默认为1-->
+        <property name="corePoolSize" value="10"/>
+        <!--最大线程数，默认为Integer.MAX_VALUE-->
+        <property name="maxPoolSize" value="50"/>
+        <!--队列最大长度，一般需要设置值>=notifyScheduledMainExecutor.maxNum；默认为Integer.MAX_VALUE-->
+        <property name="queueCapacity" value="10000"/>
+        <!--线程池维护线程所允许的空闲时间，默认为60s-->
+        <property name="keepAliveSeconds" value="300"/>
+        <!--线程池对拒绝任务（无线程可用）的处理策略，目前只支持AbortPolicy、CallerRunsPolicy；默认为后者-->
+        <property name="rejectedExecutionHandler">
+            <bean class="java.util.concurrent.ThreadPoolExecutor$CallerRunsPolicy"/>
+        </property>
+    </bean>
+    <!-- modify by chunguang.yao on 2019-09-17 for 通过多线程创建订单 end -->
+
     <tx:annotation-driven/>
 </beans>

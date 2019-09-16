@@ -7,6 +7,13 @@ package com.company.seckillgoods.common;
  */
 public final class GlobalContant {
 
-    /** 秒杀商品存入队列的固定前缀 */
+    /**
+     * 秒杀商品存入队列的固定前缀
+     */
     public final static String SECKILLGOODS_ID_PREFIX = "SECKILLGOODS_ID_PREFIX_";
+
+    /**
+     * 用户id前缀
+     */
+    public final static String USER_ID_PREFIX = "USER_ID_PREFIX_";
 }
